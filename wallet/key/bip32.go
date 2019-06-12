@@ -2,6 +2,9 @@ package key
 
 import "github.com/wemeetagain/go-hdwallet"
 
+// MK singleton master key
+var MK MasterKey
+
 // MasterKey master key interface
 type MasterKey interface {
 	ChildKey(index uint32) ([]byte, error)
@@ -20,7 +23,7 @@ func (mk *bip32MasterKey) ChildKey(index uint32) ([]byte, error) {
 }
 
 // NewMasterKey create master key from seed
-func NewMasterKey(seed []byte) MasterKey {
+func NewMasterKey(seed []byte) {
 	master := hdwallet.MasterKey(seed)
-	return &bip32MasterKey{master}
+	MK = &bip32MasterKey{master}
 }
