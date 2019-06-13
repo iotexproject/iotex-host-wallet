@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/iotexproject/iotex-host-wallet/wallet/config"
+	"github.com/iotexproject/iotex-host-wallet/wallet/controller"
 	"github.com/iotexproject/iotex-host-wallet/wallet/key"
 	"github.com/iotexproject/iotex-host-wallet/wallet/utils"
 	"github.com/labstack/echo"
@@ -37,6 +38,8 @@ func main() {
 			return next(c)
 		}
 	})
+
+	controller.AddressRoute(e)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

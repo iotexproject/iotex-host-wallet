@@ -13,6 +13,7 @@ type Address struct {
 	ID        bson.ObjectId `bson:"_id" json:"-"`
 	UserID    string        `bson:"user_id" json:"user_id"`
 	Index     uint32        `bson:"index" json:"index"`
+	Address   string        `bson:"address" json:"address"`
 	CreatedAt int64         `bson:"created_at" json:"created_at"`
 	UpdatedAt int64         `bson:"updated_at" json:"updated_at"`
 }
