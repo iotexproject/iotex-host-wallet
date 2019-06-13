@@ -40,6 +40,7 @@ func main() {
 	})
 
 	controller.AddressRoute(e)
+	controller.SignerRoute(e)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

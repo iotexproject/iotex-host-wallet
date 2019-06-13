@@ -37,14 +37,14 @@ type GetAddressResponse struct {
 func getAddress(c echo.Context) error {
 	request := new(GetAddressRequest)
 	if err := c.Bind(request); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	if request.UserID == "" {
 		return errors.New("userID is empty")
 	}
 	err := config.Verify(request.UserID, request.Sign, config.C.Container.ServicePublicKey)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "sign error")
+		return echo.NewHTTPError(http.StatusBadRequest, "sign error")
 	}
 
 	addr, err := dao.AddressFindByUserID(request.UserID)
