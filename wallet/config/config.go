@@ -1,6 +1,9 @@
 package config
 
 import (
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/base64"
 	"io/ioutil"
 	"log"
 	"os"
@@ -14,10 +17,20 @@ var C Config
 
 // Config ...
 type Config struct {
-	IPs       []string `yaml:"ips"`
-	Mongo     string   `yaml:"mongo"`
+	IPs   []string `yaml:"ips"`
+	Mongo string   `yaml:"mongo"`
+	Keys  struct {
+		Wallet struct {
+			PrivateKey string `yaml:"privateKey"`
+		} `yaml:"wallet"`
+		Service struct {
+			PublicKey string `yaml:"publicKey"`
+		} `yaml:"service"`
+	} `yaml:"keys"`
 	Container struct {
-		MongoSession *mgo.Session
+		MongoSession     *mgo.Session
+		WalletPrivateKey *rsa.PrivateKey
+		ServicePublicKey *rsa.PublicKey
 	} `yaml:"-"`
 }
 
@@ -42,4 +55,39 @@ func init() {
 		log.Panicf("connect mongo %s error: %v", C.Mongo, err)
 	}
 	C.Container.MongoSession = sess
+
+	priv, err := restorePrivateKey(C.Keys.Wallet.PrivateKey)
+	if err != nil {
+		log.Fatalf("restore private key error: %v", err)
+	}
+	C.Container.WalletPrivateKey = priv
+	pub, err := restorePublicKey(C.Keys.Service.PublicKey)
+	if err != nil {
+		log.Fatalf("restore public key error: %v", err)
+	}
+	C.Container.ServicePublicKey = pub
+}
+
+func restorePrivateKey(pem string) (*rsa.PrivateKey, error) {
+	dst, err := base64.StdEncoding.DecodeString(pem)
+	if err != nil {
+		return nil, err
+	}
+	key, err := x509.ParsePKCS8PrivateKey(dst)
+	if err != nil {
+		return nil, err
+	}
+	return key.(*rsa.PrivateKey), nil
+}
+
+func restorePublicKey(pem string) (*rsa.PublicKey, error) {
+	dst, err := base64.StdEncoding.DecodeString(pem)
+	if err != nil {
+		return nil, err
+	}
+	pub, err := x509.ParsePKIXPublicKey(dst)
+	if err != nil {
+		return nil, err
+	}
+	return pub.(*rsa.PublicKey), nil
 }
