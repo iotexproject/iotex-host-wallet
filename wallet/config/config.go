@@ -17,8 +17,8 @@ var C Config
 
 // Config ...
 type Config struct {
-	IPs   []string `yaml:"ips"`
-	Mongo string   `yaml:"mongo"`
+	Port  int32  `yaml:"port"`
+	Mongo string `yaml:"mongo"`
 	Keys  struct {
 		Wallet struct {
 			PrivateKey string `yaml:"privateKey"`
