@@ -29,7 +29,7 @@ type GetAddressRequest struct {
 
 // GetAddressResponse get address response vo
 type GetAddressResponse struct {
-	Address   string `json:"userID"`
+	Address   string `json:"address"`
 	Timestamp int64  `json:"timestamp"`
 	Sign      string `json:"sign"`
 }
