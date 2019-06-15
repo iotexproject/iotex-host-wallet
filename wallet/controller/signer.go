@@ -62,8 +62,7 @@ func sign(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "decode data error")
 	}
-	h := hash.Hash256b(decoded)
-	data, err := pk.Sign(h[:])
+	data, err := pk.Sign(decoded[:])
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "sign data error")
 	}
