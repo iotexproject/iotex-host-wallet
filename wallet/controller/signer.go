@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/iotexproject/go-pkgs/crypto"
-	"github.com/iotexproject/go-pkgs/hash"
 	"github.com/iotexproject/iotex-host-wallet/wallet/config"
 	"github.com/iotexproject/iotex-host-wallet/wallet/dao"
 	"github.com/iotexproject/iotex-host-wallet/wallet/key"
