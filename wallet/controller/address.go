@@ -35,6 +35,17 @@ type GetAddressResponse struct {
 }
 
 func getAddress(c echo.Context) error {
+	apiKey := c.Request().Header.Get("X-API-KEY")
+	service, err := dao.ServiceFindByAPIKey(apiKey)
+	if err != nil || service == nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "apikey error")
+	}
+
+	pubkey, err := service.GetPublicKey()
+	if err != nil || service == nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "apikey public key error")
+	}
+
 	request := new(GetAddressRequest)
 	if err := c.Bind(request); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -42,7 +53,7 @@ func getAddress(c echo.Context) error {
 	if request.UserID == "" {
 		return errors.New("userID is empty")
 	}
-	err := config.Verify(request.UserID, request.Sign, config.C.Container.ServicePublicKey)
+	err = config.Verify(request.UserID, request.Sign, pubkey)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "sign error")
 	}

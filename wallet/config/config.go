@@ -23,9 +23,6 @@ type Config struct {
 		Wallet struct {
 			PrivateKey string `yaml:"privateKey"`
 		} `yaml:"wallet"`
-		Service struct {
-			PublicKey string `yaml:"publicKey"`
-		} `yaml:"service"`
 	} `yaml:"keys"`
 	Container struct {
 		MongoSession     *mgo.Session
@@ -61,11 +58,6 @@ func init() {
 		log.Fatalf("restore private key error: %v", err)
 	}
 	C.Container.WalletPrivateKey = priv
-	pub, err := restorePublicKey(C.Keys.Service.PublicKey)
-	if err != nil {
-		log.Fatalf("restore public key error: %v", err)
-	}
-	C.Container.ServicePublicKey = pub
 }
 
 func restorePrivateKey(pem string) (*rsa.PrivateKey, error) {
