@@ -37,7 +37,7 @@ type GetAddressResponse struct {
 func getAddress(c echo.Context) error {
 	apiKey := c.Request().Header.Get("X-API-KEY")
 	service, err := dao.ServiceFindByAPIKey(apiKey)
-	if err != nil || service == nil {
+	if err != nil || service == nil || service.Status != "normal" {
 		return echo.NewHTTPError(http.StatusBadRequest, "apikey error")
 	}
 

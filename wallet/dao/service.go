@@ -15,6 +15,7 @@ type Service struct {
 	ID        bson.ObjectId `bson:"_id" json:"-"`
 	Name      string        `bson:"name" json:"name"`
 	APIKey    string        `bson:"api_key" json:"api_key"`
+	Status    string        `bson:"status" json:"status"`
 	PublicKey string        `bson:"public_key" json:"public_key"`
 	CreatedAt int64         `bson:"created_at" json:"created_at"`
 	UpdatedAt int64         `bson:"updated_at" json:"updated_at"`
