@@ -30,6 +30,7 @@ func main() {
 
 	controller.AddressRoute(e)
 	controller.SignerRoute(e)
+	controller.HealthRoute(e)
 
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", config.C.Port)))
 }
