@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 
 	"gopkg.in/mgo.v2"
 	"gopkg.in/yaml.v2"
@@ -55,6 +56,20 @@ func init() {
 		log.Panicf("connect mongo %s error: %v", C.Mongo, err)
 	}
 	C.Container.MongoSession = sess
+	go func() {
+		for {
+			err := C.Container.MongoSession.Ping()
+			if err != nil {
+				log.Printf("ping mongo session fail, reconnect...")
+				sess, err := mgo.Dial(C.Mongo)
+				if err != nil {
+					log.Panicf("connect mongo %s error: %v", C.Mongo, err)
+				}
+				C.Container.MongoSession = sess
+			}
+			time.Sleep(time.Minute * 5)
+		}
+	}()
 
 	priv, err := restorePrivateKey(C.Keys.Wallet.PrivateKey)
 	if err != nil {
