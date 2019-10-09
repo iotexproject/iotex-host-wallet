@@ -39,3 +39,31 @@ func AddressFindByUserID(userID string) (*Address, error) {
 	}
 	return &address, nil
 }
+
+// AddressFindByAddress find address by address
+func AddressFindByAddress(address string) (*Address, error) {
+	var result Address
+	c := conf.C.Container.MongoSession.DB("").C("address")
+	err := c.Find(bson.M{"address": address}).One(&result)
+	if err != nil {
+		if err == mgo.ErrNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &result, nil
+}
+
+// AddressFindByAddressAndUserId find address by address and userId
+func AddressFindByAddressAndUserId(userID, address string) (*Address, error) {
+	var result Address
+	c := conf.C.Container.MongoSession.DB("").C("address")
+	err := c.Find(bson.M{"address": address, "user_id": userID}).One(&result)
+	if err != nil {
+		if err == mgo.ErrNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &result, nil
+}

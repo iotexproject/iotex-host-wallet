@@ -20,9 +20,10 @@ func SignerRoute(e *echo.Echo) {
 
 // SignRequest sign request
 type SignRequest struct {
-	UserID string `json:"userID" form:"userID"`
-	Data   string `json:"data" form:"data"`
-	Sign   string `json:"sign" form:"sign"`
+	Address string `json:"address" form:"address"`
+	UserID  string `json:"userID" form:"userID"`
+	Data    string `json:"data" form:"data"`
+	Sign    string `json:"sign" form:"sign"`
 }
 
 // SignResponse sign response
@@ -38,17 +39,36 @@ func sign(c echo.Context) error {
 	if err := c.Bind(request); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	err := config.Verify(request.UserID+request.Data, request.Sign, config.C.Container.ServicePublicKey)
+	err := config.Verify(request.UserID+request.Address+request.Data, request.Sign, config.C.Container.ServicePublicKey)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "sign error")
 	}
-	addr, err := dao.AddressFindByUserID(request.UserID)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	var addr *dao.Address
+
+	if request.Address != "" && request.UserID != "" {
+		addr, err = dao.AddressFindByAddressAndUserId(request.UserID, request.Address)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+	} else {
+		if request.Address != "" {
+			addr, err = dao.AddressFindByAddress(request.Address)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			}
+		}
+
+		if request.UserID != "" {
+			addr, err = dao.AddressFindByUserID(request.UserID)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			}
+		}
 	}
 	if addr == nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("userID %s not found", request.UserID))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("userID %s or address %s not found", request.UserID, request.Address))
 	}
+
 	pkb, err := key.MK.ChildKey(addr.Index)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
