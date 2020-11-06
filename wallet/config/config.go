@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/base64"
@@ -9,7 +10,9 @@ import (
 	"os"
 	"time"
 
-	"gopkg.in/mgo.v2"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"gopkg.in/yaml.v2"
 )
 
@@ -18,9 +21,10 @@ var C Config
 
 // Config ...
 type Config struct {
-	Port  int32  `yaml:"port"`
-	Mongo string `yaml:"mongo"`
-	Keys  struct {
+	Port     int32  `yaml:"port"`
+	Mongo    string `yaml:"mongo"`
+	Database string `yaml:"database"`
+	Keys     struct {
 		Wallet struct {
 			PrivateKey string `yaml:"privateKey"`
 		} `yaml:"wallet"`
@@ -29,7 +33,7 @@ type Config struct {
 		} `yaml:"service"`
 	} `yaml:"keys"`
 	Container struct {
-		MongoSession     *mgo.Session
+		MongoClient      *mongo.Client
 		WalletPrivateKey *rsa.PrivateKey
 		ServicePublicKey *rsa.PublicKey
 	} `yaml:"-"`
@@ -51,21 +55,36 @@ func init() {
 		log.Fatalf("parse config file %s fail, %v", f, err)
 	}
 
-	sess, err := mgo.Dial(C.Mongo)
+	if C.Database == "" {
+		C.Database = "hostwallet"
+	}
+
+	client, err := mongo.NewClient(options.Client().ApplyURI(C.Mongo))
+	if err != nil {
+		log.Panicf("create mongo client %s error: %v", C.Mongo, err)
+	}
+	ctx, _ := context.WithTimeout(context.Background(), 20*time.Second)
+	err = client.Connect(ctx)
 	if err != nil {
 		log.Panicf("connect mongo %s error: %v", C.Mongo, err)
 	}
-	C.Container.MongoSession = sess
+
+	C.Container.MongoClient = client
 	go func() {
 		for {
-			err := C.Container.MongoSession.Ping()
+			err = C.Container.MongoClient.Ping(context.Background(), readpref.Primary())
 			if err != nil {
 				log.Printf("ping mongo session fail, reconnect...")
-				sess, err := mgo.Dial(C.Mongo)
+				client, err := mongo.NewClient(options.Client().ApplyURI(C.Mongo))
+				if err != nil {
+					log.Panicf("create mongo client %s error: %v", C.Mongo, err)
+				}
+				ctx, _ := context.WithTimeout(context.Background(), 20*time.Second)
+				err = client.Connect(ctx)
 				if err != nil {
 					log.Panicf("connect mongo %s error: %v", C.Mongo, err)
 				}
-				C.Container.MongoSession = sess
+				C.Container.MongoClient = client
 			}
 			time.Sleep(time.Minute * 5)
 		}

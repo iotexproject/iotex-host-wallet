@@ -1,10 +1,14 @@
 package controller
 
 import (
-	"github.com/iotexproject/iotex-host-wallet/wallet/config"
-	"github.com/labstack/echo"
+	"context"
 	"net/http"
 	"time"
+
+	"github.com/labstack/echo"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
+
+	"github.com/iotexproject/iotex-host-wallet/wallet/config"
 )
 
 type Status struct {
@@ -23,7 +27,7 @@ func health(c echo.Context) error {
 		Status:    "UP",
 		Timestamp: time.Now().Unix(),
 	}
-	err := config.C.Container.MongoSession.Ping()
+	err := config.C.Container.MongoClient.Ping(context.Background(), readpref.Primary())
 	if err != nil {
 		status.Status = "DOWN"
 		status.Error = err.Error()

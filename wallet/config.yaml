@@ -1,6 +1,7 @@
 port: 34786
 
-mongo: mongodb://127.0.0.1:27017/wallet
+mongo: mongodb+srv://hostwallet:<password>@localhost/?retryWrites=true&w=majority
+database: hostwallet
 
 keys:
   wallet:
