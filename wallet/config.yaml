@@ -1,6 +1,6 @@
 port: 34786
 
-mongo: mongodb+srv://hostwallet:ejvQq3s9De588bKY@cluster0.xkoof.mongodb.net/hostwallet_test?retryWrites=true&w=majority
+mongo: mongodb+srv://hostwallet:hostwallet@localhost/hostwallet_test?retryWrites=true&w=majority
 
 keys:
   wallet:
