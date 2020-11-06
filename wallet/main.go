@@ -6,12 +6,12 @@ import (
 	"log"
 	"os"
 
-	"github.com/iotexproject/iotex-host-wallet/wallet/config"
-
-	"github.com/iotexproject/iotex-host-wallet/wallet/controller"
-	"github.com/iotexproject/iotex-host-wallet/wallet/key"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+
+	"github.com/iotexproject/iotex-host-wallet/wallet/config"
+	"github.com/iotexproject/iotex-host-wallet/wallet/controller"
+	"github.com/iotexproject/iotex-host-wallet/wallet/key"
 )
 
 func main() {

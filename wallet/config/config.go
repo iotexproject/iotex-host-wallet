@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/base64"
@@ -9,7 +10,9 @@ import (
 	"os"
 	"time"
 
-	"gopkg.in/mgo.v2"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"gopkg.in/yaml.v2"
 )
 
@@ -29,7 +32,7 @@ type Config struct {
 		} `yaml:"service"`
 	} `yaml:"keys"`
 	Container struct {
-		MongoSession     *mgo.Session
+		MongoClient      *mongo.Client
 		WalletPrivateKey *rsa.PrivateKey
 		ServicePublicKey *rsa.PublicKey
 	} `yaml:"-"`
@@ -51,21 +54,23 @@ func init() {
 		log.Fatalf("parse config file %s fail, %v", f, err)
 	}
 
-	sess, err := mgo.Dial(C.Mongo)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(C.Mongo))
 	if err != nil {
 		log.Panicf("connect mongo %s error: %v", C.Mongo, err)
 	}
-	C.Container.MongoSession = sess
+	C.Container.MongoClient = client
 	go func() {
 		for {
-			err := C.Container.MongoSession.Ping()
+			err = client.Ping(context.Background(), readpref.Primary())
 			if err != nil {
 				log.Printf("ping mongo session fail, reconnect...")
-				sess, err := mgo.Dial(C.Mongo)
+				client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(C.Mongo))
 				if err != nil {
 					log.Panicf("connect mongo %s error: %v", C.Mongo, err)
 				}
-				C.Container.MongoSession = sess
+				C.Container.MongoClient = client
 			}
 			time.Sleep(time.Minute * 5)
 		}

@@ -10,7 +10,8 @@ require (
 	github.com/labstack/gommon v0.2.9 // indirect
 	github.com/ququzone/go-common v0.0.0-20181012074119-5a3b8e990983
 	github.com/wemeetagain/go-hdwallet v0.1.0
+	go.mongodb.org/mongo-driver v1.4.3
 	golang.org/x/crypto v0.0.0-20190611184440-5c40567a22f8 // indirect
-	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
-	gopkg.in/yaml.v2 v2.2.1
+	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
+	gopkg.in/yaml.v2 v2.2.8
 )
