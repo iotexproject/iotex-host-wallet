@@ -2,7 +2,6 @@ package dao
 
 import (
 	"context"
-	"gopkg.in/mgo.v2"
 	"time"
 
 	conf "github.com/iotexproject/iotex-host-wallet/wallet/config"
@@ -68,7 +67,7 @@ func AddressFindByAddressAndUserId(userID, address string) (*Address, error) {
 	c := conf.C.Container.MongoClient.Database("").Collection("address")
 	err := c.FindOne(context.Background(), bson.M{"address": address, "user_id": userID}).Decode(&result)
 	if err != nil {
-		if err == mgo.ErrNotFound {
+		if err == mongo.ErrNoDocuments {
 			return nil, nil
 		}
 		return nil, err

@@ -12,6 +12,5 @@ require (
 	github.com/wemeetagain/go-hdwallet v0.1.0
 	go.mongodb.org/mongo-driver v1.4.3
 	golang.org/x/crypto v0.0.0-20190611184440-5c40567a22f8 // indirect
-	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gopkg.in/yaml.v2 v2.2.8
 )
