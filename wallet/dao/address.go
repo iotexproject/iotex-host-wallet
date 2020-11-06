@@ -22,7 +22,7 @@ type Address struct {
 
 // Save config
 func (address *Address) Save() error {
-	c := conf.C.Container.MongoClient.Database("").Collection("address")
+	c := conf.C.Container.MongoClient.Database(conf.C.Database).Collection("address")
 
 	address.CreatedAt = time.Now().Unix()
 	res, err := c.InsertOne(context.Background(), address)
@@ -36,7 +36,7 @@ func (address *Address) Save() error {
 // AddressFindByUserID find address by userID
 func AddressFindByUserID(userID string) (*Address, error) {
 	var address Address
-	c := conf.C.Container.MongoClient.Database("").Collection("address")
+	c := conf.C.Container.MongoClient.Database(conf.C.Database).Collection("address")
 	err := c.FindOne(context.Background(), bson.M{"user_id": userID}).Decode(&address)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -50,7 +50,7 @@ func AddressFindByUserID(userID string) (*Address, error) {
 // AddressFindByAddress find address by address
 func AddressFindByAddress(address string) (*Address, error) {
 	var result Address
-	c := conf.C.Container.MongoClient.Database("").Collection("address")
+	c := conf.C.Container.MongoClient.Database(conf.C.Database).Collection("address")
 	err := c.FindOne(context.Background(), bson.M{"address": address}).Decode(&result)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -64,7 +64,7 @@ func AddressFindByAddress(address string) (*Address, error) {
 // AddressFindByAddressAndUserId find address by address and userId
 func AddressFindByAddressAndUserId(userID, address string) (*Address, error) {
 	var result Address
-	c := conf.C.Container.MongoClient.Database("").Collection("address")
+	c := conf.C.Container.MongoClient.Database(conf.C.Database).Collection("address")
 	err := c.FindOne(context.Background(), bson.M{"address": address, "user_id": userID}).Decode(&result)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {

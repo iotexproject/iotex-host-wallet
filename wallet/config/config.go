@@ -21,9 +21,10 @@ var C Config
 
 // Config ...
 type Config struct {
-	Port  int32  `yaml:"port"`
-	Mongo string `yaml:"mongo"`
-	Keys  struct {
+	Port     int32  `yaml:"port"`
+	Mongo    string `yaml:"mongo"`
+	Database string `yaml:"database"`
+	Keys     struct {
 		Wallet struct {
 			PrivateKey string `yaml:"privateKey"`
 		} `yaml:"wallet"`
@@ -54,19 +55,32 @@ func init() {
 		log.Fatalf("parse config file %s fail, %v", f, err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(C.Mongo))
+	if C.Database == "" {
+		C.Database = "hostwallet"
+	}
+
+	client, err := mongo.NewClient(options.Client().ApplyURI(C.Mongo))
+	if err != nil {
+		log.Panicf("create mongo client %s error: %v", C.Mongo, err)
+	}
+	ctx, _ := context.WithTimeout(context.Background(), 20*time.Second)
+	err = client.Connect(ctx)
 	if err != nil {
 		log.Panicf("connect mongo %s error: %v", C.Mongo, err)
 	}
+
 	C.Container.MongoClient = client
 	go func() {
 		for {
-			err = client.Ping(context.Background(), readpref.Primary())
+			err = C.Container.MongoClient.Ping(context.Background(), readpref.Primary())
 			if err != nil {
 				log.Printf("ping mongo session fail, reconnect...")
-				client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(C.Mongo))
+				client, err := mongo.NewClient(options.Client().ApplyURI(C.Mongo))
+				if err != nil {
+					log.Panicf("create mongo client %s error: %v", C.Mongo, err)
+				}
+				ctx, _ := context.WithTimeout(context.Background(), 20*time.Second)
+				err = client.Connect(ctx)
 				if err != nil {
 					log.Panicf("connect mongo %s error: %v", C.Mongo, err)
 				}
