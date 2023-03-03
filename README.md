@@ -1,6 +1,8 @@
 iotex-host-wallet
 =================
 
+This repo shows how to implement hosted wallet on IoTeX network using golang. 
+
 ## wallet
 
 Host wallet sources.
